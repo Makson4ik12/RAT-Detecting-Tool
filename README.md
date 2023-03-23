@@ -1,6 +1,9 @@
 # RAT-Detecting-Tool
 
-Tool to detect some of most popular RAT servers
+Utility to search the Internet for the most popular RAT-servers.<br/>
+List of supported RAT-servers:
+- AsyncRat C#
+- NjRAT
 
 # Requirements
 ```
