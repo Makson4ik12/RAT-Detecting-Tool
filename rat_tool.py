@@ -41,11 +41,14 @@ class RATTool:
             print(f"{index + 1}. {round((count / 5.5) * 100, 2)}% of AsyncRat - {response['data']['isp']},"
                   f" {response['data']['geo']['country']} -> {response['data']['ip']}:{response['data']['port']}")
 
-    def njrat(self):
-        synack = sr1(IP(dst="192.168.95.99") / TCP(dport=5552, sport=69, flags='S', seq=1000,
-                                                   options=[('MSS', 1460), ("NOP", None), ("WScale", 8), ("NOP", None), ("NOP", None), ("SAckOK", "")], window=64240))
+    @staticmethod
+    def njrat():
+        ip = str(input("Input IP to check if this NjRAT: "))
 
-        psh = sr1(IP(dst="192.168.95.99") / TCP(dport=5552, sport=69, flags='A', ack=(synack.seq+1), seq=1001))
+        synack = sr1(IP(dst=ip) / TCP(dport=5552, sport=69, flags='S', seq=1000,
+                                      options=[('MSS', 1460), ("NOP", None), ("WScale", 8), ("NOP", None), ("NOP", None), ("SAckOK", "")], window=64240))
+
+        psh = sr1(IP(dst=ip) / TCP(dport=5552, sport=69, flags='A', ack=(synack.seq+1), seq=1001))
 
         count = 0
         diff = [('MSS', 1460), ('NOP', None), ('WScale', 4), ('NOP', None), ('NOP', None), ('SAckOK', b'')]
@@ -54,6 +57,30 @@ class RATTool:
             count += 1
 
         print(f"{((sum([1 for x in diff if x in synack[TCP].options]) + count) / 7) * 100}% of NjAT")
+
+    def quasar(self):
+        responses_list = self.get_responses("(jarm:2ad2ad0002ad2ad0002ad2ad2ad2adf9fdf4eeac344e8b5003264da73585be)"
+                                            " AND certificate.signature_algorithm.name:\"SHA512-RSA\"")
+
+        print(f"Find {len(responses_list)} RATs\n")
+
+        for index, response in enumerate(responses_list):
+            count = 2
+
+            if int(((response['data']['certificate']['validity']['end']).split('-'))[0]) >= 9999:
+                count += 1
+
+            if int(response['data']['certificate']['version']) == 3:
+                count += 1
+
+            if (response['data']['http']['http_version']['name']) == "HTTP/0.9":
+                count += 1
+
+            if response['data']['port'] == 4782:
+                count += 0.5
+
+            print(f"{index + 1}. {round((count / 5.5) * 100, 2)}% of Quasar - {response['data']['isp']},"
+                  f" {response['data']['geo']['country']} -> {response['data']['ip']}:{response['data']['port']}")
 
 
 if __name__ == '__main__':
@@ -67,6 +94,7 @@ if __name__ == '__main__':
         print("RAT's list:\n"
               "1. AsyncRat C#\n"
               "2. NjRAT\n"
+              "3. Quasar\n"
               "Using: python rat_tool.py --token=\"your_api_key\" --rat=num_of_rat")
 
     if args.token == "0":
@@ -79,3 +107,5 @@ if __name__ == '__main__':
         rat_tool.async_rat()
     elif args.rat == 2:
         rat_tool.njrat()
+    elif args.rat == 3:
+        rat_tool.quasar()
