@@ -53,7 +53,7 @@ class RATTool:
         if chexdump(psh[TCP].payload, dump=True) == "0x30, 0x00":
             count += 1
 
-        print(f"{((sum([1 for x in diff if x in synack[TCP].options]) + count) / 7) * 100}% of InjAT")
+        print(f"{((sum([1 for x in diff if x in synack[TCP].options]) + count) / 7) * 100}% of NjAT")
 
 
 if __name__ == '__main__':
