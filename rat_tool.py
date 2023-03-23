@@ -1,4 +1,5 @@
 import argparse
+
 import netlas
 import json
 from scapy.all import *
@@ -41,10 +42,18 @@ class RATTool:
                   f" {response['data']['geo']['country']} -> {response['data']['ip']}:{response['data']['port']}")
 
     def njrat(self):
-        synack, d = sr(IP(dst="192.168.95.99") / TCP(dport=5552, sport=59381, flags='S', seq=0,
-                                                     options=[('MSS', 1460), ("WScale", 8), ("SAckOK", "")], window=64240))
+        synack = sr1(IP(dst="192.168.95.99") / TCP(dport=5552, sport=69, flags='S', seq=1000,
+                                                   options=[('MSS', 1460), ("NOP", None), ("WScale", 8), ("NOP", None), ("NOP", None), ("SAckOK", "")], window=64240))
 
-        synack.nsummary(lfilter=lambda s, r: (r.sprintf("%TCP.options%") == "[('MSS', 1460)]") and (r.sprintf("%TCP.window%") == "65535"))
+        psh = sr1(IP(dst="192.168.95.99") / TCP(dport=5552, sport=69, flags='A', ack=(synack.seq+1), seq=1001))
+
+        count = 0
+        diff = [('MSS', 1460), ('NOP', None), ('WScale', 4), ('NOP', None), ('NOP', None), ('SAckOK', b'')]
+
+        if chexdump(psh[TCP].payload, dump=True) == "0x30, 0x00":
+            count += 1
+
+        print(f"{((sum([1 for x in diff if x in synack[TCP].options]) + count) / 7) * 100}% of InjAT")
 
 
 if __name__ == '__main__':
@@ -70,5 +79,3 @@ if __name__ == '__main__':
         rat_tool.async_rat()
     elif args.rat == 2:
         rat_tool.njrat()
-
-#python Labs/rat_tool.py --token="u7mLzOX3WO7QmSoLAx31LS4VEf1qCVAH" --rat=2
