@@ -1,5 +1,4 @@
 import argparse
-
 import netlas
 import json
 from scapy.all import *
