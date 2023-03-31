@@ -3,7 +3,6 @@ import netlas
 import json
 from scapy.all import *
 from scapy.layers.inet import TCP, IP
-import requests
 
 
 class RATTool:
@@ -89,7 +88,7 @@ class RATTool:
         print(f"Find {len(responses_list)} RATs\n")
 
         for index, response in enumerate(responses_list):
-            print(f"byob - {response['data']['isp']},"
+            print(f"{index + 1}. byob - {response['data']['isp']},"
                     f" {response['data']['geo']['country']} -> {response['data']['ip']}:{response['data']['port']}")
 
 
