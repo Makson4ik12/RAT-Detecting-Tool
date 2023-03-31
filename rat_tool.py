@@ -3,6 +3,7 @@ import netlas
 import json
 from scapy.all import *
 from scapy.layers.inet import TCP, IP
+import requests
 
 
 class RATTool:
@@ -81,11 +82,21 @@ class RATTool:
             print(f"{index + 1}. {round((count / 5.5) * 100, 2)}% of Quasar - {response['data']['isp']},"
                   f" {response['data']['geo']['country']} -> {response['data']['ip']}:{response['data']['port']}")
 
+    def byob(self):
+        responses_list = self.get_responses("http.body:\"Directory listing for \" AND http.status_code:200 AND"
+                                            " http.body:\"xmrig\" AND http.body:\"__init__.py\"")
+
+        print(f"Find {len(responses_list)} RATs\n")
+
+        for index, response in enumerate(responses_list):
+            print(f"byob RAT - {response['data']['isp']},"
+                    f" {response['data']['geo']['country']} -> {response['data']['ip']}:{response['data']['port']}")
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='RAT Detecting Tool')
     parser.add_argument('--token', type=str, default="0", help="Your Netlas API key")
-    parser.add_argument('--rat', type=int, default="0", help="Input number of RAT")
+    parser.add_argument('--rat', type=int, default=0, help="Input number of RAT")
     parser.add_argument('--l', action='store_true', help="View list of RATs")
     args = parser.parse_args()
 
@@ -94,6 +105,7 @@ if __name__ == '__main__':
               "1. AsyncRat C#\n"
               "2. NjRAT\n"
               "3. Quasar\n"
+              "4. Ghost\n"
               "Using: python rat_tool.py --token=\"your_api_key\" --rat=num_of_rat")
 
     if args.token == "0":
@@ -108,3 +120,5 @@ if __name__ == '__main__':
         rat_tool.njrat()
     elif args.rat == 3:
         rat_tool.quasar()
+    elif args.rat == 4:
+        rat_tool.byob()
