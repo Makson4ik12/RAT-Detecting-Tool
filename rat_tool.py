@@ -104,7 +104,7 @@ if __name__ == '__main__':
               "1. AsyncRat C#\n"
               "2. NjRAT\n"
               "3. Quasar\n"
-              "4. Ghost\n"
+              "4. byob\n"
               "Using: python rat_tool.py --token=\"your_api_key\" --rat=num_of_rat")
 
     if args.token == "0":
