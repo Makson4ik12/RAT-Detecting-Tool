@@ -5,6 +5,7 @@ List of supported RAT-servers:
 - AsyncRat C#
 - NjRAT
 - Quasar
+- byob
 
 # Requirements
 ```
