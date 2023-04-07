@@ -95,7 +95,7 @@ class RATTool:
     def warzone():
         sport = random.randint(4000, 5000)
         dport = 5200
-        ip = str(input("Input IP to check if this NjRAT: "))
+        ip = str(input("Input IP to check if this Warzone RAT: "))
 
         synack = sr1(IP(dst=ip) / TCP(dport=dport, sport=sport, flags='S', seq=0, window=64240,
                                       options=[('MSS', 1460), ('NOP', None), ('WScale', 8), ('NOP', None),
