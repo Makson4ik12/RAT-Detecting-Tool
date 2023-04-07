@@ -6,6 +6,7 @@ List of supported RAT-servers:
 - NjRAT
 - Quasar
 - byob
+- Warzone RAT
 
 # Requirements
 ```
