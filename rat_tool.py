@@ -89,7 +89,30 @@ class RATTool:
 
         for index, response in enumerate(responses_list):
             print(f"{index + 1}. byob - {response['data']['isp']},"
-                    f" {response['data']['geo']['country']} -> {response['data']['ip']}:{response['data']['port']}")
+                  f" {response['data']['geo']['country']} -> {response['data']['ip']}:{response['data']['port']}")
+
+    @staticmethod
+    def warzone():
+        sport = random.randint(4000, 5000)
+        dport = 5200
+        ip = str(input("Input IP to check if this NjRAT: "))
+
+        synack = sr1(IP(dst=ip) / TCP(dport=dport, sport=sport, flags='S', seq=0, window=64240,
+                                      options=[('MSS', 1460), ('NOP', None), ('WScale', 8), ('NOP', None),
+                                               ('NOP', None), ('SAckOK', "")]))
+
+        psh = sr1(IP(dst=ip) / TCP(sport=sport, dport=dport, seq=synack.ack, ack=(synack.seq + 1), flags="A",
+                                   window=65535))
+
+        try:
+            if chexdump(psh[TCP].payload, dump=True) == "0x05, 0x38, 0x6b, 0xf4, 0x62, 0xf4," \
+                                                        " 0x9f, 0x3f, 0x35, 0x2f, 0x6e, 0xe6":
+                print(f"100% of Warzone RAT - {ip}:{dport}\n")
+                return
+        except Exception:
+            pass
+
+        print(f"0% of Warzone RAT - {ip}:{dport}\n")
 
 
 if __name__ == '__main__':
@@ -105,6 +128,7 @@ if __name__ == '__main__':
               "2. NjRAT\n"
               "3. Quasar\n"
               "4. byob\n"
+              "5. Warzone RAT\n"
               "Using: python rat_tool.py --token=\"your_api_key\" --rat=num_of_rat")
 
     if args.token == "0":
@@ -121,3 +145,5 @@ if __name__ == '__main__':
         rat_tool.quasar()
     elif args.rat == 4:
         rat_tool.byob()
+    elif args.rat == 5:
+        rat_tool.warzone()
