@@ -114,6 +114,75 @@ class RATTool:
 
         print(f"0% of Warzone RAT - {ip}:{dport}\n")
 
+    @staticmethod
+    def cerberus():
+        sport = random.randint(4000, 5000)
+        dport = 5150
+        ip = str(input("Input IP to check if this Cerberus RAT: "))
+
+        synack = sr1(IP(dst=ip) / TCP(dport=dport, sport=sport, flags='S', seq=0, window=65535))
+
+        ack_packet = IP(dst=ip) / TCP(sport=sport, dport=dport, seq=synack.ack, ack=(synack.seq + 1), flags="A",
+                                      window=10233, options=[('WScale', 8)])
+
+        send(ack_packet)
+
+        asd = sr1(IP(dst=ip) / TCP(sport=sport, dport=dport, ack=(synack.seq + 1), seq=synack.ack, flags="PA",
+                                   window=10233, options=[('WScale', 8)]) / b'qNl94efYAz227OqEDMP.\n')
+
+        comp = "0x59, 0x70, 0x6d, 0x77, 0x31, 0x53, 0x79, 0x76, 0x30, 0x32, 0x33, 0x51, 0x5a, 0x44, 0x31, 0x35"
+
+        if chexdump(asd[TCP].payload, dump=True)[0:len(comp)] == comp:
+            print(f"100% of Cerberus RAT - {ip}:{dport}\n")
+            return
+
+        print(f"0% of Cerberus RAT - {ip}:{dport}\n")
+
+    def venom(self):
+        responses_list = self.get_responses("(jarm:22b22b00022b22b22b22b22b22b22bd3b67dd3674d9af9dd91c1955a35d0e9)"
+                                            " AND certificate.signature_algorithm.name:\"SHA512-RSA\"")
+
+        print(f"Find {len(responses_list)} RATs\n")
+
+        for index, response in enumerate(responses_list):
+            count = 2
+
+            if int(((response['data']['certificate']['validity']['end']).split('-'))[0]) == 2031:
+                count += 1
+
+            if response['data']['port'] == 4782:
+                count += 0.5
+
+            print(f"{index + 1}. {round((count / 5.5) * 100, 2)}% of Venom - {response['data']['isp']},"
+                  f" {response['data']['geo']['country']} -> {response['data']['ip']}:{response['data']['port']}")
+
+    @staticmethod
+    def nanocore():
+        sport = random.randint(50000, 60000)
+        dport = 53896  # default
+        ip = str(input("Input IP to check if this Cerberus RAT: "))
+
+        synack = sr1(IP(dst=ip) / TCP(dport=dport, sport=sport, flags='S', seq=0, window=64240,
+                                      options=[('MSS', 1460), ('NOP', None), ('WScale', 8)
+                                          , ('NOP', None), ('NOP', None), ('SAckOK', "")]))
+
+        send(IP(dst=ip) / TCP(sport=sport, dport=dport, seq=synack.ack, ack=(synack.seq + 1), flags="A", window=1026))
+
+        hex_data = "40000000e9010494653742abaac7fa887534f79f4e19b73f92d805bbd79d9dfd7cb1c207e956199db4730dce03d8ad" \
+                   "34c9623e44cc45d535b6c9a62fb3bfa730e665dac8"
+
+        asd = sr1(IP(dst=ip) / TCP(sport=sport, dport=dport, ack=(synack.seq + 1), seq=synack.ack, flags="PA", window=10233) / bytes.fromhex(hex_data))
+
+        comp = "0x20, 0x00, 0x00, 0x00, 0x74, 0x1f, 0xb7, 0xa5, 0x5f, 0x60, 0xad, 0x3f, 0x06, 0xf4, 0x96, 0xf3," \
+               " 0xdd, 0x7b, 0x9c, 0xd6, 0xc9, 0xb7, 0x87, 0xda, 0x56, 0x25, 0x76, 0xb2, 0x92, 0x5d, 0xe2, 0x86," \
+               " 0x63, 0x40, 0x41, 0x02"
+
+        if chexdump(asd[TCP].payload, dump=True)[0:len(comp)] == comp:
+            print(f"100% of Nanocore RAT - {ip}:{dport}\n")
+            return
+
+        print(f"0% of Cerberus RAT - {ip}:{dport}\n")
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='RAT Detecting Tool')
@@ -129,6 +198,9 @@ if __name__ == '__main__':
               "3. Quasar\n"
               "4. byob\n"
               "5. Warzone RAT\n"
+              "6. Cerberus RAT\n"
+              "7. Venom RAT\n"
+              "8. Nanocore RAT\n"
               "Using: python rat_tool.py --token=\"your_api_key\" --rat=num_of_rat")
 
     if args.token == "0":
@@ -147,3 +219,9 @@ if __name__ == '__main__':
         rat_tool.byob()
     elif args.rat == 5:
         rat_tool.warzone()
+    elif args.rat == 6:
+        rat_tool.cerberus()
+    elif args.rat == 7:
+        rat_tool.venom()
+    elif args.rat == 8:
+        rat_tool.nanocore()
