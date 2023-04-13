@@ -7,6 +7,9 @@ List of supported RAT-servers:
 - Quasar
 - byob
 - Warzone RAT
+- Cerberus
+- Venom
+- Nanocore
 
 # Requirements
 ```
