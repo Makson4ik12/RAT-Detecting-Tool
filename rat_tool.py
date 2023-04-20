@@ -1,5 +1,7 @@
 import argparse
+import OpenSSL
 import netlas
+import ssl
 import json
 from scapy.all import *
 from scapy.layers.inet import TCP, IP
@@ -23,9 +25,20 @@ class RATTool:
         print(f"Find {len(responses_list)} RATs\n")
 
         for index, response in enumerate(responses_list):
+            valid = "0-0-0"
+            flag = 0
+
+            try:
+                cert = ssl.get_server_certificate((response['data']['ip'], int(response['data']['port'])))
+                x509 = OpenSSL.crypto.load_certificate(OpenSSL.crypto.FILETYPE_PEM, cert)
+                timestamp = x509.get_notAfter().decode('utf-8')
+                valid = (datetime.strptime(timestamp, '%Y%m%d%H%M%S%z').date().isoformat())
+                flag += 1
+            except: pass
+
             count = 2
 
-            if int(((response['data']['certificate']['validity']['end']).split('-'))[0]) >= 9999:
+            if int((valid.split('-'))[0]) == 10000:
                 count += 1
 
             if int(response['data']['certificate']['version']) == 3:
@@ -38,7 +51,8 @@ class RATTool:
                 count += 0.5
 
             print(f"{index + 1}. {round((count / 5.5) * 100, 2)}% of AsyncRat - {response['data']['isp']},"
-                  f" {response['data']['geo']['country']} -> {response['data']['ip']}:{response['data']['port']}")
+                  f" {response['data']['geo']['country']} -> {response['data']['ip']}:{response['data']['port']}"
+                  f" via {'Netlas' if not flag else 'TLS'}")
 
     @staticmethod
     def njrat():
@@ -64,9 +78,21 @@ class RATTool:
         print(f"Find {len(responses_list)} RATs\n")
 
         for index, response in enumerate(responses_list):
+            valid = "0-0-0"
+            flag = 0
+
+            try:
+                cert = ssl.get_server_certificate((response['data']['ip'], int(response['data']['port'])))
+                x509 = OpenSSL.crypto.load_certificate(OpenSSL.crypto.FILETYPE_PEM, cert)
+                timestamp = x509.get_notAfter().decode('utf-8')
+                valid = (datetime.strptime(timestamp, '%Y%m%d%H%M%S%z').date().isoformat())
+                flag += 1
+            except:
+                pass
+
             count = 2
 
-            if int(((response['data']['certificate']['validity']['end']).split('-'))[0]) >= 9999:
+            if int((valid.split('-'))[0]) == 10000:
                 count += 1
 
             if int(response['data']['certificate']['version']) == 3:
@@ -79,7 +105,8 @@ class RATTool:
                 count += 0.5
 
             print(f"{index + 1}. {round((count / 5.5) * 100, 2)}% of Quasar - {response['data']['isp']},"
-                  f" {response['data']['geo']['country']} -> {response['data']['ip']}:{response['data']['port']}")
+                  f" {response['data']['geo']['country']} -> {response['data']['ip']}:{response['data']['port']}"
+                  f" via {'Netlas' if not flag else 'TLS'}")
 
     def byob(self):
         responses_list = self.get_responses("http.body:\"Directory listing for \" AND http.status_code:200 AND"
@@ -147,13 +174,13 @@ class RATTool:
         for index, response in enumerate(responses_list):
             count = 2
 
-            if int(((response['data']['certificate']['validity']['end']).split('-'))[0]) == 2031:
+            if (response['data']['certificate']['validity']['end']) == "2031-10-22":
                 count += 1
 
             if response['data']['port'] == 4782:
                 count += 0.5
 
-            print(f"{index + 1}. {round((count / 5.5) * 100, 2)}% of Venom - {response['data']['isp']},"
+            print(f"{index + 1}. {round((count / 3.5) * 100, 2)}% of Venom - {response['data']['isp']},"
                   f" {response['data']['geo']['country']} -> {response['data']['ip']}:{response['data']['port']}")
 
     @staticmethod
