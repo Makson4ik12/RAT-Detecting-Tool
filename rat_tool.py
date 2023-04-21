@@ -34,7 +34,8 @@ class RATTool:
                 timestamp = x509.get_notAfter().decode('utf-8')
                 valid = (datetime.strptime(timestamp, '%Y%m%d%H%M%S%z').date().isoformat())
                 flag += 1
-            except: pass
+            except:
+                valid = response['data']['certificate']['validity']['end']
 
             count = 2
 
@@ -80,6 +81,7 @@ class RATTool:
         for index, response in enumerate(responses_list):
             valid = "0-0-0"
             flag = 0
+            count = 2
 
             try:
                 cert = ssl.get_server_certificate((response['data']['ip'], int(response['data']['port'])))
@@ -88,9 +90,7 @@ class RATTool:
                 valid = (datetime.strptime(timestamp, '%Y%m%d%H%M%S%z').date().isoformat())
                 flag += 1
             except:
-                pass
-
-            count = 2
+                valid = response['data']['certificate']['validity']['end']
 
             if int((valid.split('-'))[0]) == 10000:
                 count += 1
@@ -187,7 +187,7 @@ class RATTool:
     def nanocore():
         sport = random.randint(50000, 60000)
         dport = 53896  # default
-        ip = str(input("Input IP to check if this Cerberus RAT: "))
+        ip = str(input("Input IP to check if this Nanocore RAT: "))
 
         synack = sr1(IP(dst=ip) / TCP(dport=dport, sport=sport, flags='S', seq=0, window=64240,
                                       options=[('MSS', 1460), ('NOP', None), ('WScale', 8)
@@ -209,6 +209,29 @@ class RATTool:
             return
 
         print(f"0% of Cerberus RAT - {ip}:{dport}\n")
+
+    # certificate.validity.end: 2053
+    # AND
+    # certificate.signature.signature_algorithm.name: "SHA1-RSA"
+    # AND
+    # certificate.version: 3
+    def orcus(self):
+        for i in range(1, 4):
+            responses_list = self.get_responses(f"certificate.validity.end: 205{i}"
+                                                " AND certificate.signature_algorithm.name:\"SHA1-RSA\"" " AND certificate.version:3")
+
+            print(f"Find {len(responses_list)} RATs\n")
+
+            for index, response in enumerate(responses_list):
+                valid = "0-0-0"
+                flag = 0
+                # print(f"{response['data']['geo']['country']} -> {response['data']['ip']}:{response['data']['port']}")
+            # if ("2051" in response['data']['certificate']['validity']['end']):
+                # print(response['data']['certificate']['validity']['end'])
+            # if ("2052" in response['data']['certificate']['validity']['end'] and "00:00:00" in response['data']['certificate']['validity']['end']):
+                # print(response['data']['certificate']['validity']['end'])
+            # if ("2053" in response['data']['certificate']['validity']['end'] and "00:00:00" in response['data']['certificate']['validity']['end']):
+                # print(response['data']['certificate']['validity']['end'])
 
 
 if __name__ == '__main__':
@@ -252,3 +275,5 @@ if __name__ == '__main__':
         rat_tool.venom()
     elif args.rat == 8:
         rat_tool.nanocore()
+    elif args.rat == 9:
+        rat_tool.orcus()
