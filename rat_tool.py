@@ -210,29 +210,6 @@ class RATTool:
 
         print(f"0% of Cerberus RAT - {ip}:{dport}\n")
 
-    # certificate.validity.end: 2053
-    # AND
-    # certificate.signature.signature_algorithm.name: "SHA1-RSA"
-    # AND
-    # certificate.version: 3
-    def orcus(self):
-        for i in range(1, 4):
-            responses_list = self.get_responses(f"certificate.validity.end: 205{i}"
-                                                " AND certificate.signature_algorithm.name:\"SHA1-RSA\"" " AND certificate.version:3")
-
-            print(f"Find {len(responses_list)} RATs\n")
-
-            for index, response in enumerate(responses_list):
-                valid = "0-0-0"
-                flag = 0
-                # print(f"{response['data']['geo']['country']} -> {response['data']['ip']}:{response['data']['port']}")
-            # if ("2051" in response['data']['certificate']['validity']['end']):
-                # print(response['data']['certificate']['validity']['end'])
-            # if ("2052" in response['data']['certificate']['validity']['end'] and "00:00:00" in response['data']['certificate']['validity']['end']):
-                # print(response['data']['certificate']['validity']['end'])
-            # if ("2053" in response['data']['certificate']['validity']['end'] and "00:00:00" in response['data']['certificate']['validity']['end']):
-                # print(response['data']['certificate']['validity']['end'])
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='RAT Detecting Tool')
