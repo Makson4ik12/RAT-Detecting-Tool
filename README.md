@@ -1,6 +1,6 @@
 # RAT-Detecting-Tool
 
-Utility to search the Internet for the most popular RAT-servers.<br/>
+A utility for searching the Internet for the likely IP addresses of some popular RAT servers using the Netlas service.<br/>
 List of supported RAT-servers:
 - AsyncRat C#
 - NjRAT
